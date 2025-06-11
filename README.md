@@ -42,3 +42,30 @@
 1. Clone the repository:
    ```bash
    git clone git@github.com:melrojohnn/rentGapp.git
+   ```
+
+   Configure your PostgreSQL database in application.properties.
+
+Run the application:
+
+ ```bash
+./mvnw spring-boot:run
+```
+
+🧪 Testing the API
+You can use Insomnia or Postman to test endpoints.
+
+📌 TODO
+Add JWT authentication
+
+Implement device availability and rental logic
+
+Add Swagger documentation
+
+CI/CD with Jenkins and Docker
+
+👤 Author
+Melro Johnn
+GitHub: @melrojohnn
+
+
