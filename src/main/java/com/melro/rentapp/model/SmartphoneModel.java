@@ -4,8 +4,8 @@ import com.melro.rentapp.model.common.RentableItem;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "tb_tablet")
-public class TabletModel extends RentableItem {
+@Table(name = "tb_smartphone")
+public class SmartphoneModel extends RentableItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +20,9 @@ public class TabletModel extends RentableItem {
     @Column(name = "hd", length = 50)
     private String hd;
 
-    public TabletModel() {}
+    public SmartphoneModel() {}
 
-    public TabletModel(String model, String brand, String screen, String camera, String hd) {
+    public SmartphoneModel(String model, String brand, String screen, String camera, String hd) {
         this.model = model;
         this.brand = brand;
         this.screen = screen;

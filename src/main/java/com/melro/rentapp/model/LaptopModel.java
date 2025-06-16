@@ -1,32 +1,15 @@
 package com.melro.rentapp.model;
 
+import com.melro.rentapp.model.common.RentableItem;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "tb_laptop")
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-
-public class LaptopModel {
-
+public class LaptopModel extends RentableItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "model", nullable = false, length = 100)
-    private String model;
-
-    @Column(name = "brand", nullable = false, length = 100)
-    private String brand;
+    private Long laptopId;
 
     @Column(name = "gpu", length = 100)
     private String gpu;
@@ -40,12 +23,55 @@ public class LaptopModel {
     @Column(name = "hd", length = 50)
     private String hd;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    public LaptopModel() {
+    }
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    public LaptopModel(String model, String brand, String gpu, String cpu, String ram, String hd) {
+        this.model = model;
+        this.brand = brand;
+        this.gpu = gpu;
+        this.cpu = cpu;
+        this.ram = ram;
+        this.hd = hd;
+    }
 
+    public Long getLaptopId() {
+        return laptopId;
+    }
+
+    public void setLaptopId(Long laptopId) {
+        this.laptopId = laptopId;
+    }
+
+    public String getGpu() {
+        return gpu;
+    }
+
+    public void setGpu(String gpu) {
+        this.gpu = gpu;
+    }
+
+    public String getCpu() {
+        return cpu;
+    }
+
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getHd() {
+        return hd;
+    }
+
+    public void setHd(String hd) {
+        this.hd = hd;
+    }
 }
