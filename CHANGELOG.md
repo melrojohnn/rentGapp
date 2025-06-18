@@ -2,6 +2,48 @@
 
 All important changes in this project will be documented here.
 
+## [2.0.0] - 2025-01-27
+### Added
+- **Complete Rental System**: Full-featured rental management application
+- **Order Management System**: Complete order creation, validation, and tracking
+- **Business Rule Engine**: Automatic validation of plan-based equipment limits
+- **Equipment Type System**: Unified management of laptops, phones, and tablets
+- **Plan Validation**: Enforces Basic (1 equipment), Standard (2 equipment), Premium (3 equipment) rules
+- **Frontend Interface**: Modern web interface with Bootstrap 5 and JavaScript
+- **OrderValidationService**: Dedicated service for business rule enforcement
+- **EquipmentController**: Unified controller for all equipment types
+- **FrontendController**: Dedicated controller for web interface
+- **Enhanced DTOs**: OrderRequestDTO, OrderResponseDTO, EquipmentDTO
+- **Comprehensive Enums**: EquipmentType, PlanType, PlanDuration with business logic
+- **Database Schema**: Complete schema with proper relationships and constraints
+- **Test Scripts**: Automated testing scripts for order creation
+- **Documentation**: Complete English documentation and comments
+
+### Changed
+- **OrderModel**: Complete redesign to support multiple equipment types and validation
+- **OrderService**: Enhanced with validation logic and equipment loading
+- **Database Structure**: Updated schema to support complex order relationships
+- **API Endpoints**: Improved REST endpoints with proper validation
+- **Frontend**: Complete redesign with modern UI and interactive features
+- **README.md**: Updated with comprehensive project information
+- **pom.xml**: Updated dependencies and project metadata
+
+### Technical Improvements
+- **Java 17**: Latest LTS version
+- **Spring Boot 3.5.x**: Updated framework version
+- **PostgreSQL**: Optimized database configuration
+- **JPA/Hibernate**: Enhanced entity relationships
+- **Maven**: Updated dependency management
+- **Security**: Improved configuration and validation
+
+### API Endpoints
+- `POST /orders` - Create orders with automatic validation
+- `GET /orders` - List all orders with details
+- `GET /customers` - Customer management
+- `GET /plans` - Plan information
+- `GET /equipment` - Equipment listing
+- `GET /` - Web interface
+
 ## [1.2.0] - 2025-06-17
 ### Added
 - **Complete Web Interface**: Modern frontend with Bootstrap 5
@@ -77,6 +119,9 @@ All important changes in this project will be documented here.
 
 ## Release Notes
 
+### v2.0.0 - Complete Rental System
+This major version represents the complete implementation of the rental system with full business logic, validation, and modern web interface. The application is now production-ready with comprehensive order management, plan validation, and user-friendly interface.
+
 ### v1.2.0 - Complete Web Interface
 This version represents an important milestone with the implementation of a complete and functional web interface. The system now offers a modern and intuitive user experience for all operations.
 
@@ -89,7 +134,8 @@ Minimum viable product with all basic functionalities implemented and tested.
 ---
 
 **Planned Next Versions:**
-- v1.3.0: JWT authentication and authorization
-- v1.4.0: Swagger/OpenAPI documentation
-- v1.5.0: Automated tests
-- v2.0.0: Dockerization and CI/CD
+- v2.1.0: JWT authentication and authorization
+- v2.2.0: Swagger/OpenAPI documentation
+- v2.3.0: Automated tests and CI/CD
+- v2.4.0: Dockerization and deployment
+- v3.0.0: Microservices architecture
