@@ -1,0 +1,17 @@
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Controllers   │    │     Services    │    │     Models      │
+│                 │    │                 │    │                 │
+│ LaptopController│───▶│  LaptopService  │───▶│  LaptopModel    │
+│ TabletController│───▶│  TabletService  │───▶│  TabletModel    │
+│ PhoneController │───▶│  PhoneService   │───▶│ SmartphoneModel │
+│ EquipmentController│───▶│ EquipmentService │───▶│ (consolidates)  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│      DTOs       │    │   Repositories  │    │   Database      │
+│                 │    │                 │    │                 │
+│ EquipmentDTO    │    │ LaptopRepository│    │ tb_laptop       │
+│ CreateUserDto   │    │ TabletRepository│    │ tb_tablet       │
+│ OrderRequestDTO │    │ PhoneRepository │    │ tb_smartphone   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
