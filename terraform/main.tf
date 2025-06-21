@@ -22,17 +22,12 @@ provider "aws" {
   skip_metadata_api_check     = true
   skip_requesting_account_id  = true
 
-  # LocalStack endpoints
+  # LocalStack endpoints (only available services)
   endpoints {
-    s3         = "http://localhost:4566"
-    dynamodb   = "http://localhost:4566"
-    rds        = "http://localhost:4566"
-    ecs        = "http://localhost:4566"
-    ecr        = "http://localhost:4566"
-    lambda     = "http://localhost:4566"
-    apigateway = "http://localhost:4566"
-    cloudwatch = "http://localhost:4566"
-    iam        = "http://localhost:4566"
+    s3       = "http://localhost:4566"
+    dynamodb = "http://localhost:4566"
+    lambda   = "http://localhost:4566"
+    iam      = "http://localhost:4566"
   }
 }
 
@@ -87,86 +82,33 @@ resource "aws_dynamodb_table" "app_table" {
   tags = local.tags
 }
 
-# ECR Repository for Docker images
-resource "aws_ecr_repository" "app_repository" {
-  name                 = "${local.name_prefix}-repo"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  tags = local.tags
-}
-
-# ECS Cluster
-resource "aws_ecs_cluster" "app_cluster" {
-  name = "${local.name_prefix}-cluster"
-
-  setting {
-    name  = "containerInsights"
-    value = "enabled"
-  }
+# Lambda function for processing
+resource "aws_lambda_function" "app_lambda" {
+  filename         = "dummy.zip"
+  function_name    = "${local.name_prefix}-function"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs18.x"
 
   tags = local.tags
 }
 
-# ECS Task Definition
-resource "aws_ecs_task_definition" "app_task" {
-  family                   = "${local.name_prefix}-task"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = 256
-  memory                   = 512
+# IAM role for Lambda
+resource "aws_iam_role" "lambda_role" {
+  name = "${local.name_prefix}-lambda-role"
 
-  container_definitions = jsonencode([
-    {
-      name  = "${local.name_prefix}-container"
-      image = "${aws_ecr_repository.app_repository.repository_url}:latest"
-
-      portMappings = [
-        {
-          containerPort = 8080
-          protocol      = "tcp"
-        }
-      ]
-
-      environment = [
-        {
-          name  = "SPRING_PROFILES_ACTIVE"
-          value = "docker"
-        },
-        {
-          name  = "AWS_ENDPOINT"
-          value = "http://localhost:4566"
-        }
-      ]
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = "/ecs/${local.name_prefix}"
-          awslogs-region        = "us-east-1"
-          awslogs-stream-prefix = "ecs"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
         }
       }
-    }
-  ])
-
-  tags = local.tags
-}
-
-# CloudWatch Log Group
-resource "aws_cloudwatch_log_group" "app_logs" {
-  name              = "/ecs/${local.name_prefix}"
-  retention_in_days = 7
-
-  tags = local.tags
-}
-
-# API Gateway
-resource "aws_api_gateway_rest_api" "app_api" {
-  name = "${local.name_prefix}-api"
+    ]
+  })
 
   tags = local.tags
 }
@@ -182,17 +124,7 @@ output "dynamodb_table_name" {
   value       = aws_dynamodb_table.app_table.name
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = aws_ecr_repository.app_repository.repository_url
-}
-
-output "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
-  value       = aws_ecs_cluster.app_cluster.name
-}
-
-output "api_gateway_id" {
-  description = "ID of the API Gateway"
-  value       = aws_api_gateway_rest_api.app_api.id
+output "lambda_function_name" {
+  description = "Name of the Lambda function"
+  value       = aws_lambda_function.app_lambda.function_name
 }
