@@ -15,6 +15,8 @@
 - **Database**: PostgreSQL with JPA/Hibernate and proper relationships
 - **Security**: Spring Security configuration
 - **Validation Service**: Dedicated service for business rule enforcement
+- **Testing**: Comprehensive test suite with JUnit 5 and Mockito
+- **CI/CD**: Automated testing and building with GitHub Actions
 
 ### 🎯 Business Rules
 - **Basic Plan**: Allows renting 1 equipment of any type (laptop, tablet, or smartphone)
@@ -344,5 +346,52 @@ If you encounter any issues or have questions:
 ---
 
 **RentGapp v2.0.0** - Complete electronic equipment rental system! 🚀
+
+## 🧪 Testing
+
+The project includes a comprehensive test suite:
+
+### Unit Tests
+- **CustomerServiceTest**: 7 unit tests covering customer operations
+- **OrderServiceTest**: 7 unit tests covering order processing
+
+### Integration Tests
+- **CustomerControllerTest**: 6 integration tests for REST endpoints
+
+### Test Configuration
+- Uses H2 in-memory database for isolated testing
+- Spring Security configured for test scenarios
+- CSRF protection for web endpoints
+
+### Running Tests
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=CustomerServiceTest
+
+# Run with coverage
+mvn test jacoco:report
+```
+
+## 🔄 CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration:
+
+### Workflow Triggers
+- Push to `main` or `develop` branches
+- Pull requests to `main` branch
+
+### Pipeline Steps
+1. **Test Job**: Runs all unit and integration tests
+2. **Build Job**: Creates application JAR (only if tests pass)
+3. **Artifacts**: Uploads test results and application JAR
+
+### Workflow Features
+- JDK 17 setup with Maven caching
+- Parallel job execution for efficiency
+- Test result artifacts for debugging
+- Build artifacts for deployment
 
 
