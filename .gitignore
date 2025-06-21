@@ -64,3 +64,28 @@ out/
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Windows Zone.Identifier files
+*:Zone.Identifier
+*:Zone.Identifier:$DATA
+
+# Arquivos de backup e temporários adicionais
+*.orig
+*.rej
+*.swo
+*~
+
+# Arquivos de configuração local
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# Arquivos de teste de cobertura
+coverage/
+*.lcov
+
+# Arquivos de dependências locais
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
