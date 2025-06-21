@@ -89,3 +89,65 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# AWS CLI
+awscliv2.zip
+aws/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfstate.backup
+terraform.tfstate.backup.*
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Arquivos grandes e binários
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.apk
+
+# Arquivos de backup e cache
+*.cache
+.cache/
+*.backup
+backup/
+
+# Arquivos temporários do sistema
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Arquivos de IDE específicos
+*.sublime-project
+*.sublime-workspace
+.atom/
+.brackets.json
+
+# Arquivos de configuração local específicos
+local.properties
+local.yml
+local.yaml
