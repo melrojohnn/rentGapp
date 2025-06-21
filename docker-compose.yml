@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # LocalStack for AWS services simulation
+  localstack:
+    image: localstack/localstack:latest
+    container_name: rentapp-localstack
+    ports:
+      - "4566:4566"      # LocalStack endpoint
+      - "4510-4559:4510-4559"  # External service port range
+    environment:
+      - SERVICES=s3,dynamodb,rds,ecs,ecr,lambda,apigateway,cloudwatch
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=us-east-1
+      - EDGE_PORT=4566
+      - LAMBDA_EXECUTOR=docker
+      - LAMBDA_REMOTE_DOCKER=false
+      - LAMBDA_DOCKER_FLAGS=-p 127.0.0.1:9001:9001
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - rentapp-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rentapp-postgres
+    environment:
+      POSTGRES_DB: rentapp
+      POSTGRES_USER: rentapp
+      POSTGRES_PASSWORD: rentapp123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/populate_data.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - rentapp-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: rentapp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rentapp-network
+
+  # Application
+  rentapp:
+    build: .
+    container_name: rentapp-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/rentapp
+      - SPRING_DATASOURCE_USERNAME=rentapp
+      - SPRING_DATASOURCE_PASSWORD=rentapp123
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+    depends_on:
+      - postgres
+      - localstack
+    networks:
+      - rentapp-network
+    restart: unless-stopped
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: rentapp-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - rentapp
+    networks:
+      - rentapp-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  rentapp-network:
+    driver: bridge
