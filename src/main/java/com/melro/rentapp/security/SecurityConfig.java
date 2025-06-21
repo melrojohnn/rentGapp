@@ -15,13 +15,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                )
-                .httpBasic(httpBasic -> httpBasic.disable());
+                        .requestMatchers("/actuator/**", "/health", "/").permitAll()
+                        .requestMatchers("/v1/customers/**").authenticated()
+                        .requestMatchers("/v1/orders/**").authenticated()
+                        .requestMatchers("/v1/plans/**").authenticated()
+                        .requestMatchers("/v1/equipment/**").authenticated()
+                        .anyRequest().authenticated())
+                .httpBasic();
 
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

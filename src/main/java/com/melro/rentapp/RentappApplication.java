@@ -30,7 +30,7 @@ public class RentappApplication {
 	 *
 	 * Starts the embedded web server and initializes the Spring application
 	 * context.
-	 * The application will be available at http://localhost:8080 by default.
+	 * The application will be available at http://localhost:8099 by default.
 	 *
 	 * @param args Command line arguments passed to the application
 	 */
