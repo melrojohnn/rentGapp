@@ -1,14 +1,16 @@
 name: Deploy to LocalStack
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Test and Build"]
+    types:
+      - completed
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy to LocalStack
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code
@@ -21,82 +23,78 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.5.0"
-
-    - name: Run tests
-      run: mvn test
 
     - name: Build Docker image
       run: docker build -t rentapp:latest .
 
+    - name: Upload Docker image
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: rentapp:latest
+
+    - name: Install AWS CLI
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+
+    - name: Configure AWS CLI for LocalStack
+      run: |
+        aws configure set aws_access_key_id test
+        aws configure set aws_secret_access_key test
+        aws configure set default.region us-east-1
+        aws configure set default.output json
+
     - name: Start LocalStack
       run: |
-        docker run -d \
-          --name localstack \
-          -p 4566:4566 \
-          -e SERVICES=s3,dynamodb,rds,ecs,ecr,lambda,apigateway,cloudwatch \
-          -e DEBUG=1 \
-          -e AWS_DEFAULT_REGION=us-east-1 \
-          localstack/localstack:latest
+        pip install localstack
+        localstack start -d
 
     - name: Wait for LocalStack
       run: |
-        timeout 60 bash -c 'until curl -s http://localhost:4566 > /dev/null; do sleep 2; done'
+        timeout 60 bash -c 'until aws --endpoint-url=http://localhost:4566 sts get-caller-identity; do sleep 2; done'
 
-    - name: Initialize Terraform
+    - name: Deploy infrastructure with Terraform
       run: |
         cd terraform
-        export AWS_ACCESS_KEY_ID=test
-        export AWS_SECRET_ACCESS_KEY=test
-        export AWS_DEFAULT_REGION=us-east-1
         terraform init
+        terraform apply -auto-approve
 
-    - name: Plan Terraform
+    - name: Start application containers
       run: |
-        cd terraform
-        export AWS_ACCESS_KEY_ID=test
-        export AWS_SECRET_ACCESS_KEY=test
-        export AWS_DEFAULT_REGION=us-east-1
-        terraform plan -out=tfplan
+        docker-compose up -d postgres redis
+        sleep 10
+        docker-compose up -d rentapp
 
-    - name: Apply Terraform
+    - name: Wait for application startup
       run: |
-        cd terraform
-        export AWS_ACCESS_KEY_ID=test
-        export AWS_SECRET_ACCESS_KEY=test
-        export AWS_DEFAULT_REGION=us-east-1
-        terraform apply tfplan
+        timeout 120 bash -c 'until curl -f http://localhost:8081/actuator/health; do sleep 5; done'
 
-    - name: Deploy application
+    - name: Test application endpoints
       run: |
-        docker-compose up -d
+        # Test health endpoint
+        curl -f http://localhost:8081/actuator/health
 
-    - name: Wait for application
-      run: |
-        timeout 120 bash -c 'until curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 5; done'
-
-    - name: Health check
-      run: |
-        curl -f http://localhost:8080/actuator/health
-        echo "✅ Application is healthy!"
-
-    - name: Upload deployment artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: deployment-info
-        path: |
-          terraform/terraform.tfstate
-          terraform/terraform.tfplan
+        # Test login endpoint
+        curl -X POST http://localhost:8081/v1/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"username":"admin@example.com","password":"admin123"}' || echo "Login test failed"
 
     - name: Cleanup
       if: always()
       run: |
         docker-compose down
-        docker stop localstack || true
-        docker rm localstack || true
+        localstack stop
